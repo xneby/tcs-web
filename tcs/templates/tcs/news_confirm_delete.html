@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% load bootstrap_toolkit %}
+{% block title %}Wiadomości &middot; {{ competition.name }}{% endblock %}
+
+{% block content %}
+<h1>Usuń wiadomość</h1>
+
+	{% include 'partials/news.html' %}
+
+<form action="" method="post">{% csrf_token %}
+	<button type="submit" class="btn btn-danger">Usuń!</button>
+	<a href={% url 'competition-news' competition.slug %} class="btn btn-info">Nie usuwaj</a>
+</form>
+
+{% endblock content %}

@@ -1,0 +1,9 @@
+<form action="{% url 'vote' bucket.pk%}" method="post"> {% csrf_token %}
+<ul class="voting">
+	<li> <span class="badge" style="padding-right: 20px"> <label class="radio"> <input type="radio" name="vote" value="0"{% if own_vote == 0%} checked="checked"{%endif %}>No Vote</label></span></li>
+{% for d in choices %}
+<li> <span class="badge {{d.style}}" style="padding-right: 20px"> <label class="radio"> <input type="radio" name="vote" value="{{ forloop.counter }}"{%if own_vote == forloop.counter%} checked="checked"{% endif %}>{{ d.text }} ({{ d.votes }})</label></span></li>
+{% endfor %}
+<li><button type="submit" class="btn btn-primary">Głosuj</button></li>
+</ul>
+</form>

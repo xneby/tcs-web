@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% load comments %}
+
+{% block title %}Konkursy{% endblock %}
+
+{% block content %}
+<h1>Konkursy</h1>
+
+<table class="table">
+	<thead>
+		<tr><th>Nazwa</th><th>Skrót</th></tr>
+	</thead>
+	<tbody>
+		{% for competition in competitions %}
+			<tr>
+				<td><a href="{{ competition.get_absolute_url }}">{{ competition.name }}</a> {% alert competition %}</td>
+				<td>{{ competition.slug }}</td>
+			</tr>
+		{% endfor %}
+	</tbody>
+</table>
+{% endblock %}

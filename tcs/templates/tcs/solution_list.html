@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% load comments %}
+{% load voting %}
+{% block title %}Rozwiązania &middot; {{problem.name}} &middot; {{ competition.name }}{% endblock %}
+
+{% block content %}
+<div style="float: right"><a href="{% url 'solution-add' problem.slug %}" class="btn btn-success">Dodaj rozwiązanie</a></div>
+<h1>Rozwiązania</h1>
+{% if solution_list %}
+<table class="table">
+	<thead>
+		<tr>
+			<th>Nazwa</th><th>Autor</th><th>Oczekiwana punktacja</th><th>Trudność/fajność</th>
+		</tr>
+	</thead>
+	<tbody>
+{% for solution in solution_list %}
+	<tr class="{{ solution.accepted|yesno:"success,error,info" }}">
+		<td>
+			<a href="#" class="solution_name" id="solution{{ solution.pk }}">{{ solution.name }}</a>
+			{% alert solution %}
+			{% if solution.accepted %}<i class="icon-ok-circle"></i>{% elif solution.accepted == False %}<i class="icon-remove-circle"></i>{% endif %}
+		</td>
+		<td>{{ solution.author.get_full_name }}</td>
+		<td>{{ solution.expected_score }}</td>
+		<td>{{ solution.difficulty.get_average }} / {{ solution.coolness.get_average }}</td>
+	</tr>
+{% endfor %}
+	</tbody>
+</table>
+{% include 'partials/pagination.html' %}
+
+{% for solution in solution_list %}
+<div id="solution{{ solution.pk }}" class="solution"{% if show != solution.pk %} style="display: none"{% endif %}>
+
+	{% include 'partials/solution.html' %}
+</div>
+{% endfor %}
+{% else %}
+<p>Brak rozwiązań</p>
+{% endif %}
+
+{% endblock content %}

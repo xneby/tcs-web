@@ -1,0 +1,9 @@
+{% load bootstrap_toolkit %}
+<form action="{% url 'comment-add' bucket.pk %}" method="post">{% csrf_token %}
+	<fieldset>
+		<legend>Dodaj komentarz</legend>
+		{{ bucket.form|as_bootstrap }}
+		<button type="submit" class="btn btn-primary">Dodaj</button>
+	</fieldset>
+</form>
+

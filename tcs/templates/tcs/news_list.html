@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+
+{% block title %}Wiadomości &middot; {{ competition.name }}{% endblock %}
+
+{% block content %}
+<div style="float: right"><a href="{% url 'competition-news-add' competition.slug %}" class="btn btn-success">Dodaj wiadomość</a></div>
+<h1>Wiadomości</h1>
+{% if news_list %}
+{% for news in news_list %}
+	{% include 'partials/news.html' %}
+{% endfor %}
+{% include 'partials/pagination.html' %}
+{% else %}
+<p>Brak wiadomości</p>
+{% endif %}
+
+{% endblock content %}

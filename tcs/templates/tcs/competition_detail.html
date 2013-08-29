@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+{% load comments %}
+
+{% block title %}{{ competition.name }}{% endblock %}
+
+{% block content %}
+<h1>{{ competition.name }}</h1>
+{% with problems=competition.get_latest_problems solutions=competition.get_latest_solutions implementations=competition.get_latest_implementations %}
+<p><strong>Najnowsze zadania</strong></p>
+{% if problems %}
+<table class="table">
+	<thead>
+		<th>Nazwa zadania</th>
+		<th>Autor</th>
+		<th>Data dodania</th>
+	</thead>
+	<tbody>
+		{% for problem in problems %}
+			<tr>
+				<td><a href="{{ problem.get_absolute_url }}">{{ problem.name }}</a>{% alert problem %}</td>
+				<td>{{ problem.author.get_full_name }}</td>
+				<td>{{ problem.date }}</td>
+			</tr>
+		{% endfor %}
+	</tbody>
+</table>
+{% else %}
+<p>Brak zadań.</p>
+{% endif %}
+
+<p><strong>Najnowsze rozwiązania</strong></p>
+{% if solutions %}
+<table class="table">
+	<thead>
+		<tr>
+			<th>Nazwa rozwiązania</th>
+			<th>Autor</th>
+			<th>Zadanie</th>
+			<th>Oczekiwana punktacja</th>
+			<th>Data dodania</th>
+		</tr>
+	</thead>
+	<tbody>
+		{% for solution in solutions %}
+			<tr>
+				<td><a href="{{ solution.get_absolute_url}}">{{ solution.name }}</a> {% alert solution %}</td>
+				<td>{{ solution.author.get_full_name }}</td>
+				<td>{{ solution.problem.name }}</td>
+				<td>{{ solution.expected_score }}</td>
+				<td>{{ solution.date }}</td>
+			</tr>
+		{% endfor %}
+	</tbody>
+</table>
+{% else %}
+<p>Brak rozwiązań.</p>
+{% endif %}
+{% endwith %}
+{% endblock %}

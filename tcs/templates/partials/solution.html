@@ -1,0 +1,31 @@
+{% load comments %}
+{% load voting %}
+{% if solution.author == user  or user == problem.author %}
+	<div style="float: right">
+		{% if user == problem.author %}
+		<div class="btn-group">
+			<a href="{% url 'solution-accept' problem.slug solution.pk 'rej' %}" class="btn btn-danger"><i class="icon-remove"></i></a>
+			<a href="{% url 'solution-accept' problem.slug solution.pk 'can' %}" class="btn btn-info"><i class="icon-question-sign"></i></a>
+			<a href="{% url 'solution-accept' problem.slug solution.pk 'acc' %}" class="btn btn-success"><i class="icon-ok"></i></a>
+		</div>
+		{% endif %}
+		<a href="{% url 'solution-modify' problem.slug solution.pk %}" class="btn btn-info">Modyfikuj rozwiązanie</a>
+		{% if user == problem.author %}
+			<a href="{% url 'solution-delete' problem.slug solution.pk %}" class="btn btn-danger">Usuń rozwiązanie</a>
+		{% endif %}
+	</div>
+{% endif %}
+<h2>{{ solution.name }}</h2>
+<p><strong>Autor:</strong> {{ solution.author.get_full_name }}</p>
+<p><strong>Oczekiwana punktacja:</strong> {{ solution.expected_score }}</p>
+<p><strong>Data dodania:</strong> {{ solution.date }}</p>
+<p><strong>Treść rozwiązania:</strong></p>
+<div>
+	{{ solution.text|safe }}
+</div>
+
+<p><strong>Oceny:</strong></p>
+{% voting solution "difficulty" %}
+{% voting solution "coolness" %}
+{% comments solution %}
+

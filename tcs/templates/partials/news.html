@@ -1,0 +1,22 @@
+{% load comments %}
+<div class="news">
+	<div class="news-header">
+		<p class="label label-info">
+			{{news.title}}
+		</p>
+		<div style="float: right;">
+			{% if news.author == request.user %}
+			<span class="label label-inverse"><a href="{% url 'competition-news-modify' competition.slug news.id %}"><i class="icon-white icon-pencil"></i></a></span>
+			<span class="label label-inverse"><a href="{% url 'competition-news-delete' competition.slug news.id %}"><i class="icon-white icon-trash"></i></a></span>
+			{% endif %}
+			<span class="label label-important"> {{ news.author.get_full_name }}</span>
+			<span class="label label-warning"> {{ news.time }}</span>
+		</div>
+	</div>
+	<div class="news-content">
+		{{ news.text|safe }}
+	</div>
+
+	{% comments news %}
+</div>
+

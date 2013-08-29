@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% load bootstrap_toolkit %}
+{% block title %}Komentarze &middot; {{ competition.name }}{% endblock %}
+
+{% block content %}
+<h1>Usuń komentarz</h1>
+
+	{% include 'partials/comment.html' %}
+
+<form action="" method="post">{% csrf_token %}
+	<button type="submit" class="btn btn-danger">Usuń!</button>
+	<a href="{{ comment.bucket.get_url }}" class="btn btn-info">Nie usuwaj</a>
+</form>
+
+{% endblock content %}

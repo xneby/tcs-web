@@ -1,0 +1,19 @@
+<div class="comment">
+	<div class="comment-header">
+		<p class="label label-success">
+			{{comment.title}}
+		</p>
+		<div style="float: right;">
+			{% if comment.user == request.user %}
+			<span class="label label-inverse"><a href="{% url 'comment-modify' comment.pk %}"><i class="icon-white icon-pencil"></i></a></span>
+			<span class="label label-inverse"><a href="{% url 'comment-delete' comment.pk %}"><i class="icon-white icon-trash"></i></a></span>
+			{% endif %}
+			<span class="label label-important"> {{ comment.user.get_full_name }}</span>
+			<span class="label label-warning"> {{ comment.date }}</span>
+		</div>
+	</div>
+	<div class="comment-content">
+		{{ comment.text|safe }}
+	</div>
+</div>
+

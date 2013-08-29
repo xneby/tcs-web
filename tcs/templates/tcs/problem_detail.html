@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% load comments %}
+{% load voting %}
+
+{% block title %}{{ problem.name }}{% endblock %}
+
+{% block content %}
+{% if request.user == problem.author %}
+<div style="float: right">
+	<a href="{% url 'problem-modify' problem.slug %}" class="btn btn-info">Modyfikuj zadanie</a>
+</div>
+{% endif %}
+<h1>{{ problem.name }}</h1>
+<p><strong>Autor:</strong> {{ problem.author.get_full_name }}</p>
+<p><strong>Data dodania:</strong> {{ problem.date }}</p>
+<h2>Opis problemu</h2>
+<div class="problem-description">
+{{ problem.description|safe }}
+</div>
+
+{% comments problem %}
+
+<p><strong>Fajność</strong></p>
+{% voting problem "coolness" %}
+{% endblock %}
