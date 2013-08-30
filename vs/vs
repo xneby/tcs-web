@@ -1,0 +1,222 @@
+#!/usr/bin/env python
+
+import argparse
+import re
+import sys
+from interfaces import get_local_validator, get_global_validator, dummy_validator
+from exceptions import ValidationError, failwith
+from values import save_value, arg_eval
+
+import local_validators
+import global_validators
+
+parser = argparse.ArgumentParser(description = "Execute a tcs verification script.")
+
+parser.add_argument("script", type=argparse.FileType(), help="script to execute")
+parser.add_argument("file", type=argparse.FileType(), help="file to check")
+
+args = parser.parse_args()
+
+script_file = args.script
+
+syntax = ''
+limits = ''
+script = ''
+
+curr = 0
+
+for l in script_file:
+	if l.startswith('#'):
+		continue
+	elif l == '===\n':
+		curr += 1
+	else:
+		if curr == 0: syntax += l
+		if curr == 1: limits += l
+		if curr == 2: script += l
+
+LIMITS = dict()
+
+def combine(f1, f2):
+	def _result(s):
+		r = f1(s)
+		if r is not None: s = r
+		r = f2(s)
+		if r is not None: s = r
+		return s
+
+	return _result
+
+def parse_limit_function(cmd):
+	x = re.match(r'([A-Z]+)(?:[(](.*?)[)])?', cmd)
+	name = x.group(1)
+	if x.group(2) is None:
+		args = []
+	else:
+		args = map(lambda x: x.strip(), x.group(2).split(','))
+	
+	return get_local_validator(name)(*args)
+
+for l in limits.split('\n'):
+	if l.startswith('#') or l.isspace() or not l:
+		continue 
+	var, cmds = l.split(':')
+	if var not in LIMITS:
+		LIMITS[var] = dummy_validator
+	for cmd in map(str.strip, cmds.strip().split(';')):
+		LIMITS[var] = combine(LIMITS[var], parse_limit_function(cmd))
+
+class Stream(object):
+	def __init__(self, s):
+		self.s = s
+		self.i = 0
+		self.l = len(s)
+
+	def next(self):
+		if self.i == self.l:
+			return None
+		return self.s[self.i]
+
+	def read_space(self, white):
+		def _prettify(s):
+			if s == '\n': return 'EOLN'
+			if s == ' ': return 'SPACE'
+			if s == None: return 'EOF'
+			return s
+
+		if self.next() == white.char:
+			self.i += 1
+			return True
+		raise ValidationError("read '{}' but expected {}".format(_prettify(self.next()), white))
+
+	def read_token(self):
+		s = ''
+		while self.next() is not None and not self.next().isspace():
+			s += self.next()
+			self.i += 1
+		return s
+
+ss = Stream(args.file.read())
+
+class Term(object):
+	def __init__(self, name, validator):
+		self.name = name
+		self.validator = validator
+	
+	def __repr__(self):
+		return self.name
+
+	def read(self, stream):
+		try:
+			t = stream.read_token()
+		except ValidationError as e:
+			failwith('{}: {}'.format(self.name, e))
+		try:
+			if self.validator:
+				value = self.validator(t)
+			else:
+				value = t
+			save_value(self.name, value)
+		except ValidationError as e:
+			failwith('{}={}: {}'.format(self.name, t, e))
+
+		return value
+
+class Whitespace(object):
+	def __init__(self, char):
+		self.char = char
+
+	def __repr__(self):
+		if self.char == ' ':
+			return 'SPACE'
+		else:
+			return 'EOLN'
+	
+	def read(self, stream):
+		try:
+			t = stream.read_space(self)
+		except ValidationError as e:
+			failwith('{}'.format(e))
+
+class Ellipsis(object):
+	def __init__(self):
+		pass
+
+	def __repr__(self):
+		return '...'
+
+class Sequence(object):
+	def __init__(self, name, length, seperator):
+		self.name = name
+		self.length = length
+		self.seperator = seperator
+
+	def __repr__(self):
+		return 'Sequence {} of length {} seperated by {}'.format(self.name, self.length, self.seperator)
+	
+	def read(self, stream):
+		new_tokens = []
+		self.length = arg_eval(self.length)
+		global_validator = LIMITS.get('{}_i'.format(self.name), dummy_validator)
+		for i in range(self.length):
+			name = '{}_{}'.format(self.name, i+1)
+			validator = combine(LIMITS.get(name, dummy_validator), global_validator)
+			new_tokens.append(Term(name, validator))
+			new_tokens.append(self.seperator)
+		new_tokens = new_tokens[:-1]
+
+		value = []
+		for token in new_tokens:
+			r = token.read(stream)
+			if isinstance(token, Term):
+				value.append(r)
+
+		save_value(self.name, value)
+
+		return value
+
+def parse(s):
+	if s == '...':
+		return Ellipsis()
+	return Term(s, LIMITS.get(s, dummy_validator))
+
+tokens = []
+token = ''
+
+for c in syntax:
+	if c.isspace():
+		tokens.append(parse(token))
+		token = ''
+		tokens.append(Whitespace(c))
+	else:
+		token += c
+
+el_index = (i for i,v in enumerate(tokens) if isinstance(v, Ellipsis))
+
+for i in el_index:
+	lt = tokens[i+2]
+	name, length = lt.name.split('_')
+	tokens[i-4:i+3] = [Sequence(name, length, tokens[i+1])]
+
+for token in tokens:
+	token.read(ss)
+
+def parse_function(cmd):
+	x = re.match(r'([A-Z]+)(?:[(](.*?)[)])?', cmd)
+	name = x.group(1)
+	if x.group(2) is None:
+		args = []
+	else:
+		args = map(lambda x: x.strip(), x.group(2).split(','))
+	
+	return get_global_validator(name), args
+
+for l in script.split('\n'):
+	if l.startswith('#') or l == '': continue
+	f, args = parse_function(l)
+	try:
+		f(*args)
+	except ValidationError as e:
+		failwith(e)
+
+print('OK')
