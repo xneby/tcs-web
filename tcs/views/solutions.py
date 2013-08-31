@@ -12,7 +12,7 @@ class SolutionList(ListView):
 		self.problem = get_object_or_404(Problem, slug = self.kwargs['slug'])
 		if not self.problem.get_competition().has_permission(self.request.user):
 			raise PermissionDenied()
-		return self.problem.solution_set.all()
+		return self.problem.get_solutions()
 
 	def get_context_data(self, *args, **kwargs):
 		c = super().get_context_data(*args, **kwargs)

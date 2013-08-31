@@ -10,7 +10,16 @@
 <table class="table">
 	<thead>
 		<tr>
-			<th>Nazwa</th><th>Autor</th><th>Oczekiwana punktacja</th><th>Trudność/fajność</th>
+			<th rowspan="2">Nazwa</th>
+			<th rowspan="2">Autor</th>
+			<th rowspan="2">Oczekiwana punktacja</th>
+			<th colspan="3" style="text-align: center">Trudność</th>
+			<th rowspan="2">Fajność</th>
+		</tr>
+		<tr>
+			<td><abbr title="Koncepcja">K</abbr></td>
+			<td><abbr title="Implementacja">I</abbr></td>
+			<td><strong><abbr title="Razem">R</abbr></strong></td>
 		</tr>
 	</thead>
 	<tbody>
@@ -23,7 +32,10 @@
 		</td>
 		<td>{{ solution.author.get_full_name }}</td>
 		<td>{{ solution.expected_score }}</td>
-		<td>{{ solution.difficulty.get_average }} / {{ solution.coolness.get_average }}</td>
+		<td>{{ solution.difficulty.get_average|floatformat:1 }}</td>
+		<td>{{ solution.get_implementation_difficulty|floatformat:1 }}</td>
+		<td><strong>{{ solution.get_difficulty|floatformat:1 }}</strong></td>
+		<td>{{ solution.coolness.get_average|floatformat:1 }}</td>
 	</tr>
 {% endfor %}
 	</tbody>

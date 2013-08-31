@@ -9,13 +9,14 @@
 {% if problem_list %}
 <table class="table">
 	<tr>
-		<th>Nazwa</th><th>Skrót</th><th>Autor</th><th>Status</th>
+		<th>Nazwa</th><th>Skrót</th><th>Autor</th><th>Trudność</th><th>Status</th>
 	</tr>
 {% for problem in problem_list %}
 	<tr>
 		<td><a href="{% url 'problem-details' problem.slug %}">{{ problem.name }}</a> {% alert problem %}</td>
 		<td>{{ problem.slug }}</td>
 		<td>{{ problem.author.get_full_name }}</td>
+		<td>{{ problem.get_difficulty|floatformat:"2" }}</td>
 		<td>N/A</td>
 	</tr>
 {% endfor %}

@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Competition, News, Comment, Problem, Solution, Vote
+from .models import *
 
 def adminize(model):
 	class _admin(admin.ModelAdmin):
@@ -12,3 +12,4 @@ adminize(Comment)
 adminize(Problem)
 adminize(Solution)
 adminize(Vote)
+adminize(Implementation)

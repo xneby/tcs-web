@@ -1,0 +1,27 @@
+{% load comments %}
+<div style="float: right">
+	{% if user == problem.author %}
+		<div class="btn-group">
+			<a href="{% url 'implementation-accept' problem.slug solution.pk implementation.pk 'rej' %}" class="btn btn-danger">
+				<i class="icon-remove"></i>
+			</a>
+			<a href="{% url 'implementation-accept' problem.slug solution.pk implementation.pk 'can' %}" class="btn btn-info">
+				<i class="icon-question-sign"></i>
+			</a>
+			<a href="{% url 'implementation-accept' problem.slug solution.pk implementation.pk 'acc' %}" class="btn btn-success">
+				<i class="icon-ok"></i>
+			</a>
+		</div>
+	{% endif %}
+	<a href="{% url 'implementation-modify' problem.slug solution.pk implementation.pk %}" class="btn btn-info">Modyfikuj implementację</a>
+	{% if user == problem.author %}
+	<a href="{% url 'implementation-delete' problem.slug solution.pk implementation.pk %}" class="btn btn-danger">Usuń implementację</a>
+	{% endif %}
+</div>
+<p><strong>Autor:</strong> {{ implementation.author.get_full_name }}</p>
+
+<pre class="sh_{{ implementation.language }}">
+{{ implementation.code }}
+</pre>
+
+{% comments implementation %}

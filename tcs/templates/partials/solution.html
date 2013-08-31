@@ -29,3 +29,6 @@
 {% voting solution "coolness" %}
 {% comments solution %}
 
+<p><strong>Implementacje:</strong></p>
+{% include 'partials/implementation_list.html' with implementation_list=solution.get_implementations %}
+

@@ -1,0 +1,33 @@
+{% load comments %}
+<div style="float: right">
+	<a href="{% url 'implementation-add' problem.slug solution.id %}" class="btn btn-success">Dodaj implementację</a>
+</div>
+{% if implementation_list %}
+<table class="table">
+	<thead>
+	<tr>
+		<th>Autor</th>
+		<th>Data</th>
+		<th>Język</th>
+		<th>Długość</th>
+	</tr>
+	</thead>
+	<tbody>
+	{% for implementation in implementation_list %}
+	<tr class="{{ implementation.accepted|yesno:"success,error,info" }}">
+		<td>{{ implementation.author.get_full_name }}</td>
+		<td><a href="#" class="impl_name" data-id="{{ implementation.id }}">{{ implementation.date }}</a> {% alert implementation %}</td>
+		<td>{{ implementation.language }}</td>
+		<td>{{ implementation.code_length }}</td>
+	</tr>
+	{% endfor %}
+	</tbody>
+</table>
+{% for impl in implementation_list %}
+<div class="implementation" data-id="{{impl.id}}">
+	{% include 'partials/implementation.html'  with implementation=impl %}
+</div>
+{% endfor %}
+{% else %}
+<p>Brak implementacji.</p>
+{% endif %}

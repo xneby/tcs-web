@@ -76,3 +76,7 @@
 .voting li {
 	display: inline;
 }
+
+div.implementation {
+	display: none;
+};
