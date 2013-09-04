@@ -1,0 +1,146 @@
+The syntax file consists of three parts, separated by three equations.
+The schema is following:
++-------------------------SYNTAX-FILE--+
+|test structure                        |
+|===                                   |
+|validators for every variable         |
+|===                                   |
+|additional functions                  |
++--------------------------------------+
+
+=== TEST STRUCTURE ===
+Test structure is a set of variables or sequences of variables,
+separated by some whitespaces (SPACE or NEWLINE).
+Every whitespace here is important! The script will be trying to match them in every test!
+The only permitted names of variables are letters,
+or letters followed by many underscores with numbers (indices).
+Examples of allowed names: n a b a_0 a_1_0_100_23_32_234
+You can also use sequences of variables.
+Thay resemble o for loop:
++----CODE-+
+|{n|i|a_i}|
++---------+
+n   - the length of a sequence - you can insert here an integer
+      or an expresion which can use variables read earlier.
+i   - the iterator (0..n-1) - later, you will be able to use this letter instead of number indices
+a_i - the body of the loop - not only variables are allowed here,
+      but also every valid "test structure", the only difference is
+			that you can use the variable i here, which will contain the iteration number
+
+There are also two other loops possible:
++----CODE-+
+|(n|i|a_i)| - between every iteration, tries to read a SPACE
+|[n|i|a_i]| - between every iteration, tries to read a NEWLINE
++---------+
+
+=== VARIABLE VALIDATORS ===
+Here you can put some validators assigned to some variables.
+For example, if there's a variable n read from the test and it is an integer from range(2,32),
+you can write, the following code:
++--------------CODE-+
+|n: INT; RANGE(2,32)| validators are separated with colons (;)
++-------------------+
+
+Note that, the reverse order is not allowed:
++--------------CODE-+
+|n: RANGE(2,32); INT|
++-------------------+
+That's because the function INT casts the variable from string to int,
+and the function RANGE requires n to be an integer.
+
+Instead of a single variable, you can match the whole sequences:
++----------------CODE-+
+|a: WORD; LENGTH(1,15)| It will match a_0, a_1, ... a_(n-1)
+|a_2: LENGTH(2,3)     | It will match only a_2
++---------------------+
+
+The order between lines in this section is not significant.
+The above and below code are equivalent:
++----------------CODE-+
+|a_2: LENGTH(2,3)     |
+|a: WORD; LENGTH(1,15)|
++---------------------+
+
+That's because the script always calls the validators from the most general
+to the most particular variables.
+
+Comments in this sections always occupy a whole line, which begins with '#'
++------------------------------------------------------------------CODE-+
+|# This is a comment                                                    |
+| # There's a space before the hash character, so this is not a comment |
++-----------------------------------------------------------------------+
+
+You can list all possible validators by running
+$ vs -v
+
+To see the description of only one validator, you can specify its name:
+$ vs -v range
+
+Or any prefix of its name:
+$ vs -v ran
+
+=== ADDITIONAL FUNCTIONS ===
+Here the general syntax is similar to the validators' syntax.
+That is, in every line you can put some functions separated by colons.
+Also comments works in the same way.
+
+The difference is, that the functions are not assigned to a particular variable,
+or a set of variables.
+
+Every function takes some arguments, which can be integers, strings, or variable selectors.
+
+The variable selector looks like a variable name.
+For example to hand a variable a_5_43 to the function, you can simply put there its name.
+
+Some functions instead of a single variable, can take sequences of variables,
+or even sequences of sequences of variables.
+
+The simple sequences can be obtained just by writting any prefix of the variable name.
+If you do so, you will get a list of all variables, which names begin with that prefix.
+This list will be sorted by their names.
+
+Assume, we have variables a_0_0, a_0_1, a_0_2, a_1_0, a_1_1 and a_2_0.
+Here is what you will get from some identifiers:
+a - [a_0_0, a_0_1, a_0_2, a_1_0, a_1_1, a_2_0] // but with values instead of their names
+a_0 - [a_0_0, a_0_1, a_0_2]
+a_1 - [a_1_0, a_1_1]
+a_2 - [a_2_0]
+a_2_0 - a_2_0
+
+To get a sequence of sequences, you should use the ? mark.
+It will group variables with the same value uder the ? sign.
+a_? - [[a_0_0, a_0_1, a_0_2], [a_1_0, a_1_1], [a_2_0]]
+a_0_? - [[a_0_0], [a_0_1], [a_0_2]]
+a_?_? - [[[a_0_0], [a_0_1], [a_0_2]], [[a_1_0], [a_1_1]], [[a_2_0]]]
+? - that's illegal
+
+The list of all possible functions is under:
+$ vs -f
+
+Also, it can show only one function if you specify its name:
+$ vs -f print
+
+Or, any prefix of its name:
+$vs -f pr
+
+=== Examples ===
++--------------SYNTAX-+ +---------TEST-+
+|n                    | |5             | This test is correct.
+|(n|i|a_i)            | |ab cd ef gh ij|
+|===                  | +--------------+
+|n: INT; RANGE(1,10)  |
+|a: WORD; LENGTH(1,24)| +---------TEST-+
+|===                  | |5             | This test is not correct,
+|UNIQUE(a)            | |ab cd ef gh cd| because the words are not uniuqe.
++---------------------+ +--------------+
+
++--------------SYNTAX-+ +---------TEST-+
+|n                    | |5             | This test is correct.
+|(n|i|a_i)            | |ab cd ef gh ij|
+|===                  | +--------------+
+|n: INT; RANGE(1,10)  |
+|a: WORD; LENGTH(1,24)| +---------TEST-+
+|===                  | |5             | This test is now correct,
+|UNIQUE(a_?)          | |ab cd ef gh cd| because every variable is in its own list.
++---------------------+ +--------------+
+
