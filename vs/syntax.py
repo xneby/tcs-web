@@ -76,7 +76,9 @@ class Syntax(SyntaxObject):
 	def __repr__(self):
 		return str(self.syntax)
 		
-	def read(self,stream,variables=dict()):
+	def read(self,stream,variables=None):
+		if variables is None:
+			variables = dict()
 		for syntax in self.syntax:
 			syntax.read(stream,variables)
 
@@ -149,7 +151,9 @@ class Variable(SyntaxObject):
 		self.args=name[1:]
 	def __repr__(self):
 		return 'Variable('+'_'.join([self.name]+self.args)+')'
-	def read(self,stream,variables=dict()):
+	def read(self,stream,variables=None):
+		if variables is None:
+			variables = dict()
 		save_value('_'.join([self.name]+[variables[i] for i in self.args]),stream.read_token())
 
 class Whitespace(SyntaxObject):
@@ -170,6 +174,8 @@ class Whitespace(SyntaxObject):
 		else:
 			raise VSError("Whitespace not in {SPACE,NEWLINE,EMPTY}")
 
-	def read(self,stream,variables=dict()):
+	def read(self,stream,variables=None):
+		if variables is None:
+			variables = dict()
 		if self.char:
 			stream.read_chars(self.char)
